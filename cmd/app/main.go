@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
+
 	"github.com/SergeyP163/chat-api/internal/db"
 	"github.com/SergeyP163/chat-api/internal/handler"
 	"github.com/SergeyP163/chat-api/internal/repository"
@@ -13,6 +15,10 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("warning: .env file not found")
+	}
+
 	database, err := db.NewPostgres()
 	if err != nil {
 		log.Fatal("db connection error: ", err)

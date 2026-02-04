@@ -19,6 +19,10 @@ func NewPostgres() (*gorm.DB, error) {
 		port = "5432"
 	}
 
+	if host == "" || user == "" || dbname == "" {
+		return nil, fmt.Errorf("database env vars are not set")
+	}
+
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, user, password, dbname, port,

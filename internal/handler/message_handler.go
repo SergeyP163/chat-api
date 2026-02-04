@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/SergeyP163/chat-api/internal/service"
 	"gorm.io/gorm"
@@ -18,7 +17,8 @@ func NewMessageHandler(service *service.MessageService) *MessageHandler {
 }
 
 func (h *MessageHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if !strings.HasSuffix(r.URL.Path, "/message") {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -29,7 +29,7 @@ func (h *MessageHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Text string `json:"text"`
+		Content string `json:"content"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -37,7 +37,12 @@ func (h *MessageHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg, err := h.service.Create(chatID, req.Text)
+	if req.Content == "" {
+		http.Error(w, "content is required", http.StatusBadRequest)
+		return
+	}
+
+	msg, err := h.service.Create(chatID, req.Content)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			http.Error(w, "chat not found", http.StatusNotFound)
